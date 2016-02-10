@@ -23,163 +23,6 @@ var floatsPerVertex = 7;
 var ANGLE_STEP = 45.0;
 var CUBE_ANGLE_STEP = 45.0;
 
-function makeCylinder(radius, faceRight) {
-    // Create a white circle with 16 vertices at the top and a radius of 1.0
-    var topVertices = 40;
-
-    // Instaniate a list for the vertices of the cylinder which will consist of the
-    // top and bottom caps and the body of the cylinder
-    var cylinderVertices = new Float32Array(((topVertices * 6) - 2) * floatsPerVertex);
-
-    // Create the top cap of the cylinder
-    for (v = 1, j = 0; v < 2 * topVertices; v++, j += floatsPerVertex) {
-        if (v % 2 == 0) {
-            cylinderVertices[j] = 0.0;
-            cylinderVertices[j + 1] = 0.0;
-            cylinderVertices[j + 2] = 1.0;
-            cylinderVertices[j + 3] = 1.0;
-            cylinderVertices[j + 4] = Math.random();
-            cylinderVertices[j + 5] = Math.random();
-            cylinderVertices[j + 6] = Math.random();
-        } else {
-            cylinderVertices[j] = Math.cos(Math.PI * (v - 1) / topVertices);
-            cylinderVertices[j + 1] = Math.sin(Math.PI * (v - 1) / topVertices);
-            cylinderVertices[j + 2] = 1.0;
-            cylinderVertices[j + 3] = 1.0;
-            cylinderVertices[j + 4] = Math.random();
-            cylinderVertices[j + 5] = Math.random();
-            cylinderVertices[j + 6] = Math.random();
-        }
-    }
-
-    // Create the tube of the cylinder
-    for(v = 0; v < 2 * topVertices; v++, j += floatsPerVertex) {
-        if (v % 2 == 0) {
-            if (faceRight) {
-              cylinderVertices[j] = radius * Math.cos(Math.PI * (v) / topVertices);
-              cylinderVertices[j + 1] = radius * Math.sin(Math.PI * (v) / topVertices);
-            } else {
-              cylinderVertices[j] = Math.cos(Math.PI * (v) / topVertices);
-              cylinderVertices[j + 1] = Math.sin(Math.PI * (v) / topVertices);
-            }
-
-            cylinderVertices[j + 2] = 1.0;
-            cylinderVertices[j + 3] = 1.0;
-            cylinderVertices[j + 4] = Math.random();
-            cylinderVertices[j + 5] = Math.random();
-            cylinderVertices[j + 6] = Math.random();
-        }
-        else {
-            if (faceRight) {
-              cylinderVertices[j] = Math.cos(Math.PI * (v - 1) / topVertices);
-              cylinderVertices[j + 1] = Math.sin(Math.PI * (v - 1) / topVertices);
-            } else {
-              cylinderVertices[j] = radius * Math.cos(Math.PI * (v - 1) / topVertices);
-              cylinderVertices[j + 1] = radius * Math.sin(Math.PI * (v - 1) / topVertices);
-            }
-
-            cylinderVertices[j + 2] = -1.0;
-            cylinderVertices[j + 3] = 1.0;
-            cylinderVertices[j + 4] = Math.random();
-            cylinderVertices[j + 5] = Math.random();
-            cylinderVertices[j + 6] = Math.random();
-        }
-    }
-
-    // Create the bottom cap of the cylinder
-    for(v = 0; v < (2 * topVertices - 1); v++, j += floatsPerVertex) {
-        if(v % 2 == 0) {
-            if (faceRight) {
-              cylinderVertices[j] = 0.0;
-              cylinderVertices[j + 1] = 0.0;
-            } else {
-              cylinderVertices[j] = radius * Math.cos(Math.PI * (v) / topVertices);
-              cylinderVertices[j + 1] = radius * Math.sin(Math.PI * (v) / topVertices);
-            }
-
-            cylinderVertices[j + 2] = -1.0;
-            cylinderVertices[j + 3] = 1.0;
-            cylinderVertices[j + 4] = Math.random();
-            cylinderVertices[j + 5] = Math.random();
-            cylinderVertices[j + 6] = Math.random();
-        }
-        else {
-            if (faceRight) {
-              cylinderVertices[j] = Math.cos(Math.PI * (v - 1) / topVertices);
-              cylinderVertices[j + 1] = Math.sin(Math.PI * (v - 1) / topVertices);
-            } else {
-              cylinderVertices[j] = 0.0;
-              cylinderVertices[j + 1] = 0.0;
-            }
-
-            cylinderVertices[j + 2] = -1.0;
-            cylinderVertices[j + 3] = 1.0;
-            cylinderVertices[j + 4] = Math.random();
-            cylinderVertices[j + 5] = Math.random();
-            cylinderVertices[j + 6] = Math.random();
-        }
-    }
-    return cylinderVertices;
-}
-
-function makeCube() {
-  var c30 = Math.sqrt(0.75);
-  var sq2 = Math.sqrt(2.0);
-
-  var cubeVertices = new Float32Array([
-     0.0,  0.0, sq2, 1.0,     1.0, 1.0, 1.0,
-     c30, -0.5, 0.0, 1.0,     0.0, 0.0, 1.0,
-     0.0,  1.0, 0.0, 1.0,     1.0, 0.0, 0.0,
-     0.0,  0.0, sq2, 1.0,     1.0, 1.0, 1.0,
-     0.0,  1.0, 0.0, 1.0,     1.0, 0.0, 0.0,
-    -c30, -0.5, 0.0, 1.0,     0.0, 1.0, 0.0,
-     0.0,  0.0, sq2, 1.0,     1.0, 1.0, 1.0,
-    -c30, -0.5, 0.0, 1.0,     0.0, 1.0, 0.0,
-     c30, -0.5, 0.0, 1.0,     0.0, 0.0, 1.0,
-    -c30, -0.5, -0.2, 1.0,    0.0, 1.0, 0.0,
-     0.0,  1.0, -0.2, 1.0,    1.0, 0.0, 0.0,
-     c30, -0.5, -0.2, 1.0,    0.0, 0.0, 1.0,
-     1.0, -1.0, -1.0, 1.0,    1.0, 0.0, 0.0,
-     1.0,  1.0, -1.0, 1.0,    1.0, 0.0, 0.0,
-     1.0,  1.0,  1.0, 1.0,    1.0, 0.0, 0.0,
-     1.0,  1.0,  1.0, 1.0,    1.0, 0.1, 0.1,
-     1.0, -1.0,  1.0, 1.0,    1.0, 0.1, 0.1,
-     1.0, -1.0, -1.0, 1.0,    1.0, 0.1, 0.1,
-    -1.0,  1.0, -1.0, 1.0,    0.0, 1.0, 0.0,
-    -1.0,  1.0,  1.0, 1.0,    0.0, 1.0, 0.0,
-     1.0,  1.0,  1.0, 1.0,    0.0, 1.0, 0.0,
-     1.0,  1.0,  1.0, 1.0,    0.1, 1.0, 0.1,
-     1.0,  1.0, -1.0, 1.0,    0.1, 1.0, 0.1,
-    -1.0,  1.0, -1.0, 1.0,    0.1, 1.0, 0.1,
-    -1.0,  1.0,  1.0, 1.0,    0.0, 0.0, 1.0,
-    -1.0, -1.0,  1.0, 1.0,    0.0, 0.0, 1.0,
-     1.0, -1.0,  1.0, 1.0,    0.0, 0.0, 1.0,
-     1.0, -1.0,  1.0, 1.0,    0.1, 0.1, 1.0,
-     1.0,  1.0,  1.0, 1.0,    0.1, 0.1, 1.0,
-    -1.0,  1.0,  1.0, 1.0,    0.1, 0.1, 1.0,
-    -1.0, -1.0,  1.0, 1.0,    0.0, 1.0, 1.0,
-    -1.0,  1.0,  1.0, 1.0,    0.0, 1.0, 1.0,
-    -1.0,  1.0, -1.0, 1.0,    0.0, 1.0, 1.0,
-    -1.0,  1.0, -1.0, 1.0,    0.1, 1.0, 1.0,
-    -1.0, -1.0, -1.0, 1.0,    0.1, 1.0, 1.0,
-    -1.0, -1.0,  1.0, 1.0,    0.1, 1.0, 1.0,
-     1.0, -1.0, -1.0, 1.0,    1.0, 0.0, 1.0,
-     1.0, -1.0,  1.0, 1.0,    1.0, 0.0, 1.0,
-    -1.0, -1.0,  1.0, 1.0,    1.0, 0.0, 1.0,
-    -1.0, -1.0,  1.0, 1.0,    1.0, 0.1, 1.0,
-    -1.0, -1.0, -1.0, 1.0,    1.0, 0.1, 1.0,
-     1.0, -1.0, -1.0, 1.0,    1.0, 0.1, 1.0,
-     1.0,  1.0, -1.0, 1.0,    1.0, 1.0, 0.0,
-     1.0, -1.0, -1.0, 1.0,    1.0, 1.0, 0.0,
-    -1.0, -1.0, -1.0, 1.0,    1.0, 1.0, 0.0,
-    -1.0, -1.0, -1.0, 1.0,    1.0, 1.0, 0.1,
-    -1.0,  1.0, -1.0, 1.0,    1.0, 1.0, 0.1,
-     1.0,  1.0, -1.0, 1.0,    1.0, 1.0, 0.1,
-
-  ]);
-  return cubeVertices;
-}
-
 function makeSphere(sliceVertices) {
     var slices = 20;
     var sliceAngle = Math.PI / slices;
@@ -242,14 +85,8 @@ function initVertexBuffer(rendering) {
     moon1 = makeSphere(7);
     moon2 = makeSphere(9);
     moon3 = makeSphere(11);
-    cube1 = makeCube();
-    cube2 = makeCube();
-    cube3 = makeCube();
-    wrist = makeCube();
-    finger1 = makeCube();
-    finger2 = makeCube();
 
-    var totalSize = planet.length + moon1.length + moon2.length + moon3.length + cube1.length + cube2.length + cube3.length + wrist.length + finger1.length + finger2.length;
+    var totalSize = planet.length + moon1.length + moon2.length + moon3.length;
     var totalVertices = totalSize / floatsPerVertex;
     var colorShapes = new Float32Array(totalSize);
 
@@ -271,36 +108,6 @@ function initVertexBuffer(rendering) {
     moon3Start = i;
     for(j = 0; j < moon3.length; i++, j++) {
         colorShapes[i] = moon3[j];
-    }
-
-    cube1Start = i;
-    for(j = 0; j < cube1.length; i++, j++) {
-        colorShapes[i] = cube1[j];
-    }
-
-    cube2Start = i;
-    for(j = 0; j < cube2.length; i++, j++) {
-        colorShapes[i] = cube2[j];
-    }
-
-    cube3Start = i;
-    for(j = 0; j < cube3.length; i++, j++) {
-        colorShapes[i] = cube3[j];
-    }
-
-    wristStart = i;
-    for(j = 0; j < wrist.length; i++, j++) {
-        colorShapes[i] = wrist[j];
-    }
-
-    finger1Start = i;
-    for(j = 0; j < finger1.length; i++, j++) {
-        colorShapes[i] = finger1[j];
-    }
-
-    finger2Start = i;
-    for(j = 0; j < finger2.length; i++, j++) {
-        colorShapes[i] = finger2[j];
     }
 
     var shapeBufferHandle = rendering.createBuffer();
@@ -352,73 +159,36 @@ function initVertexBuffer(rendering) {
     return totalVertices;
 }
 
-function draw(gl, n, bodyAngle, cube1Angle, cube2Angle, cube3Angle, finger1Angle, finger2Angle, modelMatrix, u_ModelMatrix) {
+function draw(gl, n, bodyAngle, modelMatrix, u_ModelMatrix) {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   // Draw the planet
-  modelMatrix.setTranslate(-0.6, -0.8, 0.0);
+  modelMatrix.setTranslate(-0.6, -0.2, 0.0);
   modelMatrix.scale(0.1, 0.1, 0.1);
   modelMatrix.rotate(bodyAngle, 0, 1, 0);
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
   gl.drawArrays(gl.TRIANGLE_STRIP, planetStart / floatsPerVertex, planet.length / floatsPerVertex);
 
   // Draw the first moon
-  modelMatrix.setTranslate(-0.6, -0.3, 0.0);
+  modelMatrix.setTranslate(-0.4, -0.6, 0.0);
   modelMatrix.scale(0.2, 0.2, 0.2);
   modelMatrix.rotate(bodyAngle, 0, 1, 0);
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
   gl.drawArrays(gl.TRIANGLE_STRIP, moon1Start / floatsPerVertex, moon1.length / floatsPerVertex);
 
   // Draw the second moon
-  modelMatrix.setTranslate(-0.6, 0.2, 0.0);
+  modelMatrix.setTranslate(-0.2, 0.2, 0.0);
   modelMatrix.scale(0.2, 0.2, 0.2);
   modelMatrix.rotate(bodyAngle, 0, 1, 0);
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
   gl.drawArrays(gl.TRIANGLE_STRIP, moon2Start / floatsPerVertex, moon2.length / floatsPerVertex);
 
   // Draw the third moon
-  modelMatrix.setTranslate(-0.6, 0.7, 0.0);
+  modelMatrix.setTranslate(0.0, 0.7, 0.0);
   modelMatrix.scale(0.1, 0.1, 0.1);
   modelMatrix.rotate(bodyAngle, 0, 1, 0);
   gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
   gl.drawArrays(gl.TRIANGLE_STRIP, moon3Start / floatsPerVertex, moon3.length / floatsPerVertex);
-
-  // Draw the first cube
-  modelMatrix.setTranslate(0.0, 0.2, 0.0);
-  modelMatrix.scale(0.1, 0.1, 0.1);
-  modelMatrix.rotate(cube1Angle, 0, 1, 0);
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  gl.drawArrays(gl.TRIANGLE_STRIP, cube1Start / floatsPerVertex, cube1.length / floatsPerVertex);
-  // Draw the second cube
-  modelMatrix.setTranslate(0.0, 0.0, 0.0);
-  modelMatrix.scale(0.1, 0.1, 0.1);
-  modelMatrix.rotate(cube2Angle, 0, 1, 0);
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  gl.drawArrays(gl.TRIANGLE_STRIP, cube2Start / floatsPerVertex, cube2.length / floatsPerVertex);
-  // Draw the third cube
-  modelMatrix.setTranslate(0.0, -0.2, 0.0);
-  modelMatrix.scale(0.1, 0.1, 0.1);
-  modelMatrix.rotate(cube3Angle, 0, 1, 0);
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  gl.drawArrays(gl.TRIANGLE_STRIP, cube3Start / floatsPerVertex, cube3.length / floatsPerVertex);
-
-  // Draw the arm base
-  modelMatrix.setTranslate(0.5, 0.2, 0.0);
-  modelMatrix.scale(0.3, 0.3, 0.3);
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  gl.drawArrays(gl.TRIANGLE_STRIP, wristStart / floatsPerVertex, wrist.length / floatsPerVertex);
-  // Draw the first finger
-  modelMatrix.setTranslate(0.3, 0.6, 0.0);
-  modelMatrix.scale(0.1, 0.1, 0.1);
-  modelMatrix.rotate(finger1Angle, 0, 0, 1);
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  gl.drawArrays(gl.TRIANGLE_STRIP, finger1Start / floatsPerVertex, finger1.length / floatsPerVertex);
-  // Draw the second finger
-  modelMatrix.setTranslate(0.7, 0.6, 0.0);
-  modelMatrix.scale(0.1, 0.1, 0.1);
-  modelMatrix.rotate(finger2Angle, 0, 0, 1);
-  gl.uniformMatrix4fv(u_ModelMatrix, false, modelMatrix.elements);
-  gl.drawArrays(gl.TRIANGLE_STRIP, finger2Start / floatsPerVertex, finger2.length / floatsPerVertex);
 }
 
 var g_last = Date.now();
@@ -480,11 +250,6 @@ $(document).ready(function() {
     }
     var modelMatrix = new Matrix4();
     var bodyAngle = 0.0;
-    var cube1Angle = 0.0;
-    var cube2Angle = 0.0;
-    var cube3Angle = 0.0;
-    var finger1Angle = 0.0;
-    var finger2Angle = 0.0;
     var planetsStopped = false;
     var isDragging = false;
     var wasDragging = false;
@@ -515,29 +280,10 @@ $(document).ready(function() {
           }
         });
         if (!planetsStopped) {
-          console.log(wasDragging);
           bodyAngle = animate(bodyAngle, direction);
         }
 
-        $(document).keypress(function(event) {
-          if (event.which == 97) {
-            cube1Angle = animateCube(cube1Angle);
-          } else if (event.which == 115) {
-            cube2Angle = animateCube(cube2Angle);
-          } else if (event.which == 100) {
-            cube3Angle = animateCube(cube3Angle);
-          } else if (event.which == 102) {
-            finger1Angle = animate(finger1Angle, false);
-          } else if (event.which == 103) {
-            finger2Angle = animate(finger2Angle, false);
-          } else if (event.which == 104) {
-            finger1Angle = animate(finger1Angle, true);
-          } else if (event.which == 106) {
-            finger2Angle = animate(finger2Angle, true);
-          }
-        });
-
-        draw(rendering, vertices, bodyAngle, cube1Angle, cube2Angle, cube3Angle, finger1Angle, finger2Angle, modelMatrix, u_ModelMatrix);
+        draw(rendering, vertices, bodyAngle, modelMatrix, u_ModelMatrix);
         requestAnimationFrame(tick, canvas);
     };
 

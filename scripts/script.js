@@ -22,9 +22,20 @@ var FSHADER_SOURCE =
 var floatsPerVertex = 6;
 var forestVerts, gndVerts, ballVerts, moonVerts, planetVerts;
 var g_EyeX = 0.20, g_EyeY = 0.25, g_EyeZ = 4.25;
+var canvas;
+
+$(window).on('resize', function() {
+  canvas = document.getElementById('webgl');
+  var nuGL = getWebGLContext(canvas);
+
+  canvas.width = innerWidth;
+  canvas.height = innerHeight * 3 / 4;
+
+  draw(nuGL);
+});
 
 $(document).ready(function() {
-  var canvas = document.getElementById('webgl');
+  canvas = document.getElementById('webgl');
 
   var gl = getWebGLContext(canvas);
   if (!gl) {
@@ -48,16 +59,16 @@ $(document).ready(function() {
 
   gl.clearColor(0.25, 0.2, 0.25, 1.0);
 
-  var u_mvpMatrix = gl.getUniformLocation(gl.program, 'u_mvpMatrix');
+  u_mvpMatrix = gl.getUniformLocation(gl.program, 'u_mvpMatrix');
   if (!u_mvpMatrix) {
     console.log('Failed to get u_mvpMatrix!');
     return;
   }
 
-  var viewMatrix = new Matrix4();
-  var modelMatrix = new Matrix4();
-  var projMatrix = new Matrix4();
-  var mvpMatrix = new Matrix4();
+  viewMatrix = new Matrix4();
+  modelMatrix = new Matrix4();
+  projMatrix = new Matrix4();
+  mvpMatrix = new Matrix4();
 
   $(document).keypress(function(event) {
     if(ev.keyCode == 39) {
@@ -147,20 +158,19 @@ function initVertexBuffers(gl) {
   return mySiz/floatsPerVertex; // return # of vertices
 }
 
-function draw(gl, viewMatrix, projMatrix, modelMatrix, mvpMatrix, u_mvpMatrix) {
+function draw(gl) {
   gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
   // The Left Viewport
   gl.viewport(0,
               0,
               gl.drawingBufferWidth/2,
-              gl.drawingBufferHeight/2);
-
+              gl.drawingBufferHeight);
   viewMatrix.setLookAt(g_EyeX, g_EyeY, g_EyeZ,
                         0, 0, 0,
                         0, 1, 0);
+  projMatrix.setPerspective(40, (gl.drawingBufferWidth / 2) / (gl.drawingBufferHeight), 1, 100);
 
-  projMatrix.setPerspective(40, (gl.drawingBufferWidth / 2) / (gl.drawingBufferHeight / 2), 1, 100);
   mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
   gl.uniformMatrix4fv(u_mvpMatrix, false, mvpMatrix.elements);
 
@@ -171,22 +181,25 @@ function draw(gl, viewMatrix, projMatrix, modelMatrix, mvpMatrix, u_mvpMatrix) {
   gl.viewport(gl.drawingBufferWidth/2,
               0,
               gl.drawingBufferWidth/2,
-              gl.drawingBufferHeight/2);
+              gl.drawingBufferHeight);
   viewMatrix.setLookAt(-g_EyeX, g_EyeY, g_EyeZ,
                       0, 0, 0,
                       0, 1, 0);
+  projMatrix.setOrtho(-1.0, 1.0, -1.0, 1.0, 0.0, 2000.0);
+
   mvpMatrix.set(projMatrix).multiply(viewMatrix).multiply(modelMatrix);
   gl.uniformMatrix4fv(u_mvpMatrix, false, mvpMatrix.elements);
+
+  drawRightScene(gl, viewMatrix, projMatrix, modelMatrix, mvpMatrix, u_mvpMatrix);
 }
 
 function drawLeftScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMatrix, myU_MvpMatrix) {
   // Draw the forest tree
   myModelMatrix.rotate(-90.0, 1,0,0);
-  myModelMatrix.translate(0.0, 0.0, -0.6);
-  myModelMatrix.scale(0.4, 0.4,0.4);
+  myModelMatrix.translate(0.2, 0.2, -0.9);
 
   myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
-  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
 
   myGL.drawArrays(myGL.TRIANGLES,
                 forestStart/floatsPerVertex,
@@ -194,11 +207,10 @@ function drawLeftScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMat
 
   // Draw the moon
   myModelMatrix.rotate(-90.0, 1,0,0);
-  myModelMatrix.translate(0.0, 0.0, -0.6);
-  myModelMatrix.scale(0.4, 0.4,0.4);
+  myModelMatrix.translate(0.6, 0.8, -0.4);
 
   myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
-  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
 
   myGL.drawArrays(myGL.TRIANGLE_STRIP,
               moonStart/floatsPerVertex,
@@ -206,11 +218,10 @@ function drawLeftScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMat
 
   // Draw the ball
   myModelMatrix.rotate(-90.0, 1,0,0);
-  myModelMatrix.translate(0.0, 0.0, -0.6);
-  myModelMatrix.scale(0.4, 0.4,0.4);
+  myModelMatrix.translate(0.4, 0.6, -0.4);
 
   myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
-  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
 
   myGL.drawArrays(myGL.TRIANGLE_STRIP,
               ballStart/floatsPerVertex,
@@ -218,11 +229,10 @@ function drawLeftScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMat
 
   // Draw the planet
   myModelMatrix.rotate(-90.0, 1,0,0);
-  myModelMatrix.translate(0.0, 0.0, -0.6);
-  myModelMatrix.scale(0.4, 0.4,0.4);
+  myModelMatrix.translate(0.2, 0.8, -0.4);
 
   myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
-  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
 
   myGL.drawArrays(myGL.TRIANGLE_STRIP,
             planetStart/floatsPerVertex,
@@ -231,7 +241,6 @@ function drawLeftScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMat
   // Draw the ground plane grid
   myModelMatrix.rotate(-90.0, 1,0,0);
   myModelMatrix.translate(0.0, 0.0, -0.6);
-  myModelMatrix.scale(0.4, 0.4,0.4);
 
   myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
   myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
@@ -242,6 +251,13 @@ function drawLeftScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMat
 }
 
 function drawRightScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMatrix, myU_MvpMatrix) {
+  // Draw the ground plane grid
+  myModelMatrix.rotate(-90.0, 1,0,0);
+  myModelMatrix.translate(0.0, 0.0, -0.6);
+
+  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
+  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+
   myGL.drawArrays(myGL.LINES,
                 gndStart/floatsPerVertex,
                 gndVerts.length/floatsPerVertex);

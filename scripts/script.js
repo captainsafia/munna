@@ -140,6 +140,7 @@ $(document).ready(function() {
       // The "S" key
       case 115:
         g_EyeX -= 0.01;
+        break;
       // The "Q" key
       case 113:
         console.log('inside q');
@@ -270,7 +271,7 @@ function draw(gl) {
   // The Left Viewport
   gl.viewport(0,
               0,
-              canvas.width/2,
+              canvas.width / 2,
               canvas.height);
   viewMatrix.setLookAt(g_EyeX, g_EyeY, g_EyeZ,
                         0, 0, 0,
@@ -282,12 +283,11 @@ function draw(gl) {
 
   drawLeftScene(gl, viewMatrix, projMatrix, modelMatrix, mvpMatrix, u_mvpMatrix);
 
-
   // The Right Viewport
-  gl.viewport(canvas.width / 2,
+  gl.viewport(gl.drawingBufferWidth / 2,
               0,
-              canvas.width / 2,
-              canvas.height);
+              gl.drawingBufferWidth / 2,
+              gl.drawingBufferHeight);
   viewMatrix.setLookAt(-g_EyeX, g_EyeY, g_EyeZ,
                       0, 0, 0,
                       0, 1, 0);
@@ -318,7 +318,7 @@ function drawLeftScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMat
 }
 
 function drawRightScene(gl, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMatrix, myU_MvpMatrix) {
-// Draw the first cube
+  // Draw the first cube
   myModelMatrix.setTranslate(0.0, 0.4, 0.0);
   myModelMatrix.scale(0.1, 0.1, 0.1);
   myModelMatrix.rotate(cube1Angle, 0, 1, 0);

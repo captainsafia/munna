@@ -39,6 +39,7 @@ var g_arm1Angle = 90.0;
 var g_joint1Angle = 45.0;
 var g_joint2Angle = 0.0;
 var g_joint3Angle = 0.0;
+var CUBE_ANGLE_STEP = 45.0;
 
 // Coordinate transformation matrix variables
 var g_modelMatrix = new Matrix4();
@@ -54,6 +55,17 @@ function pushMatrix(m) {
 
 function popMatrix() {
   return g_matrixStack.pop();
+}
+
+var s_last = Date.now();
+
+function animateCube(angle) {
+  var now = Date.now();
+  var elapsed = now - s_last;
+  s_last = now;
+
+  var newAngle = angle + (CUBE_ANGLE_STEP * elapsed) / 1000.0;
+  return newAngle %= 360;
 }
 
 $(window).on('resize', function() {
@@ -113,8 +125,14 @@ $(document).ready(function() {
   projMatrix = new Matrix4();
   mvpMatrix = new Matrix4();
 
+  cube1Angle = 0.0;
+  cube2Angle = 0.0;
+  cube3Angle = 0.0;
+  cube4Angle = 0.0;
+
   $(document).keypress(function(event) {
-    switch (event.keyCode) {
+    console.log(event.which);
+    switch (event.which) {
       // The "A" key
       case 97:
         g_EyeX += 0.01;
@@ -123,36 +141,21 @@ $(document).ready(function() {
       case 115:
         g_EyeX -= 0.01;
       // The "Q" key
-      case 81:
-        if (g_joint1Angle < 135.0) g_joint1Angle += ANGLE_STEP;
+      case 113:
+        console.log('inside q');
+        cube1Angle = animateCube(cube1Angle);
         break;
       // The "W" key
-      case 87:
-        if (g_joint1Angle > -135.0) g_joint1Angle -= ANGLE_STEP;
+      case 119:
+        cube2Angle = animateCube(cube2Angle);
         break;
       // The "E" key
-      case 69:
-        g_arm1Angle = (g_arm1Angle + ANGLE_STEP) % 360;
+      case 101:
+        cube3Angle = animateCube(cube3Angle);
         break;
       // The "R" key
-      case 82:
-         g_arm1Angle = (g_arm1Angle - ANGLE_STEP) % 360;
-         break;
-      // The "T" key
-      case 84:
-        g_joint2Angle = (g_joint2Angle + ANGLE_STEP) % 360;
-        break;
-      // The "Y" key
-      case 89:
-        g_joint2Angle = (g_joint2Angle - ANGLE_STEP) % 360;
-        break;
-      // The "U" key
-      case 85:
-        if (g_joint3Angle < 60.0)  g_joint3Angle = (g_joint3Angle + ANGLE_STEP) % 360;
-        break;
-      // The "I" key
-      case 73:
-        if (g_joint3Angle > -60.0) g_joint3Angle = (g_joint3Angle - ANGLE_STEP) % 360;
+      case 114:
+        cube4Angle = animateCube(cube4Angle);
         break;
       default:
         return;
@@ -172,8 +175,12 @@ function initVertexBuffers(gl) {
   ballVerts = makeSphere(5);
   planetVerts = makeSphere(7);
   armVerts = makeArmVertices();
+  cube1 = makeCube();
+  cube2 = makeCube();
+  cube3 = makeCube();
+  cube4 = makeCube();
 
-  mySiz = forestVerts.length + gndVerts.length + moonVerts.length + ballVerts.length + planetVerts.length + armVerts.length;
+  mySiz = forestVerts.length + gndVerts.length + moonVerts.length + ballVerts.length + planetVerts.length + cube1.length + cube2.length + cube3.length + cube4.length;
 
   var nn = mySiz / floatsPerVertex;
   console.log('nn is', nn, 'mySiz is', mySiz, 'floatsPerVertex is', floatsPerVertex);
@@ -205,9 +212,24 @@ function initVertexBuffers(gl) {
     verticesColors[i] = planetVerts[j];
   }
 
-  armStart = i;
-  for(j=0; j< armVerts.length; i++, j++) {
-    verticesColors[i] = armVerts[j];
+  cube1Start = i;
+  for(j = 0; j < cube1.length; i++, j++) {
+      verticesColors[i] = cube1[j];
+  }
+
+  cube2Start = i;
+  for(j = 0; j < cube2.length; i++, j++) {
+      verticesColors[i] = cube2[j];
+  }
+
+  cube3Start = i;
+  for(j = 0; j < cube3.length; i++, j++) {
+      verticesColors[i] = cube3[j];
+  }
+
+  cube4Start = i;
+  for(j = 0; j < cube4.length; i++, j++) {
+      verticesColors[i] = cube4[j];
   }
 
   // Create a vertex buffer object (VBO)
@@ -239,7 +261,7 @@ function initVertexBuffers(gl) {
   gl.vertexAttribPointer(a_Color, 3, gl.FLOAT, false, FSIZE * 6, FSIZE * 3);
   gl.enableVertexAttribArray(a_Color);
 
-  return mySiz/floatsPerVertex; // return # of vertices
+  return mySiz / floatsPerVertex; // return # of vertices
 }
 
 function draw(gl) {
@@ -279,55 +301,15 @@ function draw(gl) {
 
 function drawLeftScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMatrix, myU_MvpMatrix) {
   // // Draw the forest tree
-  myModelMatrix.rotate(-90.0, 1,0,0);
-  myModelMatrix.translate(0.2, 0.9, -1.);
-
-  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
-  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
 
   myGL.drawArrays(myGL.TRIANGLES,
                 forestStart/floatsPerVertex,
                 forestVerts.length/floatsPerVertex);
 
-  // Draw the moon
-  myModelMatrix.rotate(-90.0, 1, 0, 0);
-  myModelMatrix.translate(0.6, 0.8, -0.4);
+  myModelMatrix.rotate(-90.0, 1,0,0);
+  myModelMatrix.translate(0.0, 0.0, -0.6);
 
-  // myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
-  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
-
-  myGL.drawArrays(myGL.TRIANGLE_STRIP,
-              moonStart/floatsPerVertex,
-              moonVerts.length/floatsPerVertex);
-
-  // Draw the ball
-  myModelMatrix.rotate(-90.0, 1, 0, 0);
-  myModelMatrix.translate(0.4, 0.6, -0.4);
-
-  // myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
-  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
-
-  myGL.drawArrays(myGL.TRIANGLE_STRIP,
-              ballStart/floatsPerVertex,
-              ballVerts.length/floatsPerVertex);
-
-  // Draw the planet
-  myModelMatrix.rotate(-90.0, 1, 0, 0);
-  myModelMatrix.translate(0.2, 0.8, -0.4);
-
-  // myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
-  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
-
-  myGL.drawArrays(myGL.TRIANGLE_STRIP,
-            planetStart/floatsPerVertex,
-            planetVerts.length/floatsPerVertex);
-
-  // Draw the ground plane grid
-  myModelMatrix.rotate(-90.0, 1, 0, 0);
-  myModelMatrix.translate(0.0, 0.0, 0.0);
-  myModelMatrix.scale(0.4, 0.4,0.4);
-
-  // myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
+  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
   myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
 
   myGL.drawArrays(myGL.LINES,
@@ -335,41 +317,89 @@ function drawLeftScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMat
                 gndVerts.length/floatsPerVertex);
 }
 
-function drawRightScene(myGL, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMatrix, myU_MvpMatrix) {
-  g_modelMatrix.setTranslate(0.0, -12.0, 0.0);
+function drawRightScene(gl, myViewMatrix, myProjMatrix, myModelMatrix, myMvpMatrix, myU_MvpMatrix) {
+// Draw the first cube
+  myModelMatrix.setTranslate(0.0, 0.4, 0.0);
+  myModelMatrix.scale(0.1, 0.1, 0.1);
+  myModelMatrix.rotate(cube1Angle, 0, 1, 0);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, modelMatrix.elements);
+  gl.drawArrays(gl.TRIANGLE_STRIP, cube1Start / floatsPerVertex, cube1.length / floatsPerVertex);
 
-  var segment1Length = 10;
-  g_modelMatrix.rotate(g_arm1Angle, 0.0, 1.0, 0.0);
-  drawArmPart(myGL, 3.0, segment1Length, 3.0);
+  // Draw the second cube
+  myModelMatrix.setTranslate(0.0, 0.2, 0.0);
+  myModelMatrix.scale(0.1, 0.1, 0.1);
+  myModelMatrix.rotate(cube2Angle, 0, 1, 0);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
+  gl.drawArrays(gl.TRIANGLE_STRIP, cube2Start / floatsPerVertex, cube2.length / floatsPerVertex);
 
-  var segment2Length = 10;
-  g_modelMatrix.translate(0.0, segment1Length, 0.0);
-  g_modelMatrix.rotate(g_joint1Angle, 0.0, 0.0, 1.0);
-  drawArmPart(myGL, 4.0, segment1Length, 4.0);
+  // Draw the third cube
+  myModelMatrix.setTranslate(0.0, 0.0, 0.0);
+  myModelMatrix.scale(0.1, 0.1, 0.1);
+  myModelMatrix.rotate(cube3Angle, 0, 1, 0);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
+  gl.drawArrays(gl.TRIANGLE_STRIP, cube3Start / floatsPerVertex, cube3.length / floatsPerVertex);
 
-  var segment3Length = 10;
-  g_modelMatrix.translate(0.0, segment2Length, 0.0);
-  g_modelMatrix.rotate(g_joint1Angle, 0.0, 0.0, 1.0);
-  drawArmPart(myGL, 4.0, segment3Length, 6.0);
+  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
 
-  var segment4Length = 10;
-  g_modelMatrix.translate(0.0, segment3Length, 0.0);
-  g_modelMatrix.rotate(g_joint1Angle, 0.0, 0.0, 1.0);
-  drawArmPart(myGL, 4.0, segment4Length, 8.0);
+  // Draw the fourth cube
+  myModelMatrix.setTranslate(0.0, -0.2, 0.0);
+  myModelMatrix.scale(0.1, 0.1, 0.1);
+  myModelMatrix.rotate(cube4Angle, 0, 1, 0);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
+  gl.drawArrays(gl.TRIANGLE_STRIP, cube4Start / floatsPerVertex, cube4.length / floatsPerVertex);
 
-  g_modelMatrix.rotate(-90.0, 1, 0, 0);
-  g_modelMatrix.translate(0.0, 0.0, -1.0);
-  g_modelMatrix.scale(0.4, 0.4,0.4);
+  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
 
-  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(g_modelMatrix);
-  myGL.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+  // Draw the planet
+  myModelMatrix.setTranslate(0.5, -0.2, 0.0);
+  myModelMatrix.scale(0.1, 0.1, 0.1);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
+  gl.drawArrays(gl.TRIANGLE_STRIP, planetStart / floatsPerVertex, planetVerts.length / floatsPerVertex);
+
+  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+
+  // Draw the moon
+  myModelMatrix.setTranslate(0.5, 0.2, 0.0);
+  myModelMatrix.scale(0.1, 0.1, 0.1);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
+  gl.drawArrays(gl.TRIANGLE_STRIP, moonStart / floatsPerVertex, moonVerts.length / floatsPerVertex);
+
+  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+
+  // Draw the ball
+  myModelMatrix.setTranslate(-0.5, 0.2, 0.0);
+  myModelMatrix.scale(0.1, 0.1, 0.1);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
+  gl.drawArrays(gl.TRIANGLE_STRIP, ballStart / floatsPerVertex, ballVerts.length / floatsPerVertex);
+
+  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+
+  // Draw the ball
+  myModelMatrix.setTranslate(-0.5, -0.2, 0.0);
+  myModelMatrix.scale(0.1, 0.1, 0.1);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myModelMatrix.elements);
+  gl.drawArrays(gl.TRIANGLE_STRIP, ballStart / floatsPerVertex, ballVerts.length / floatsPerVertex);
+
+  myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
 
   // Draw the ground plane grid
-  myGL.drawArrays(myGL.LINES,
+  myModelMatrix.rotate(-90.0, 1, 0, 0);
+  myModelMatrix.translate(0.0, 0.0, 0.0);
+  myModelMatrix.scale(0.4, 0.4,0.4);
+
+  // myMvpMatrix.set(myProjMatrix).multiply(myViewMatrix).multiply(myModelMatrix);
+  gl.uniformMatrix4fv(myU_MvpMatrix, false, myMvpMatrix.elements);
+
+  gl.drawArrays(gl.LINES,
                 gndStart/floatsPerVertex,
                 gndVerts.length/floatsPerVertex);
 
-  g_modelMatrix = popMatrix();
 }
 
 var g_normalMatrix = new Matrix4();
